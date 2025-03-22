@@ -110,11 +110,25 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[types.TextCont
                     result.extend([table[0] for table in tables])
                     return [types.TextContent(type="text", text="\n".join(result))]
                 
+                # Special handling for DESCRIBE/DESC statements
+                elif query.strip().upper().startswith(("DESCRIBE", "DESC")):
+                    columns = [desc[0] for desc in cursor.description]
+                    rows = cursor.fetchall()
+                    result = [",".join(map(str, columns))]
+                    result.extend([",".join(map(str, row)) for row in rows])
+                    # 确保消费所有结果集
+                    while cursor.nextset():
+                        pass
+                    return [types.TextContent(type="text", text="\n".join(result))]
+                
                 # Regular SELECT queries
                 elif query.strip().upper().startswith("SELECT"):
                     columns = [desc[0] for desc in cursor.description]
                     rows = cursor.fetchall()
                     result = [",".join(map(str, row)) for row in rows]
+                    # 确保消费所有结果集
+                    while cursor.nextset():
+                        pass
                     return [types.TextContent(type="text", text="\n".join([",".join(columns)] + result))]
                 
                 # Non-SELECT queries
