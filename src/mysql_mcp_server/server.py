@@ -7,7 +7,6 @@ from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server import NotificationOptions
 from mcp.server.stdio import stdio_server
-from mysql.connector import connect, Error
 import pymysql
 
 
